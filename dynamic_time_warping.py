@@ -1,7 +1,6 @@
 import random
 import matplotlib.pyplot as plt
 
-random.seed(42)
 BOLD_RED = "\033[1;31m"
 RESET = "\033[0m"
 
@@ -44,10 +43,11 @@ def compute_dtw_matrix(timeseries):
 
 def backtrace_dtw(matrix):
     path = []
+    sum_dtw = matrix[1][1]
     i, j = (len(matrix) - 1, len(matrix[1]) - 1)
     while i > 1 or j > 1:
         path.append((i, j))
-
+        sum_dtw += matrix[i][j]
         if i > 1 and j > 1:
             min_val = min(matrix[i - 1][j], matrix[i][j - 1], matrix[i - 1][j - 1])
             print(min_val)
@@ -78,6 +78,8 @@ def backtrace_dtw(matrix):
                 end=" ",
             )
         print("")
+
+    return sum_dtw
 
 
 def plot_timeseries(timeseries: list[list[int]]):
