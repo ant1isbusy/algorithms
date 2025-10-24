@@ -12,8 +12,9 @@ def create_timeseries(length=7):
     return vals
 
 
-def create_offset_timeseries(timeseries, offset=4):
+def create_offset_timeseries(timeseries, offset=2):
     copy = [0] * offset + timeseries[:-offset]
+    copy = [val + (random.random() * (random.choice((-1, 1)))) for val in copy]
     return copy
 
 
@@ -48,7 +49,7 @@ def compute_dtw_matrix(timeseries):
     return matrix
 
 
-def backtrace_dtw(matrix):
+def backtrace_dtw(matrix, print_matrix=False):
     path = []
     sum_dtw = matrix[1][1]
     i, j = (len(matrix) - 1, len(matrix[1]) - 1)
@@ -57,7 +58,6 @@ def backtrace_dtw(matrix):
         sum_dtw += matrix[i][j]
         if i > 1 and j > 1:
             min_val = min(matrix[i - 1][j], matrix[i][j - 1], matrix[i - 1][j - 1])
-            print(min_val)
             if min_val == matrix[i - 1][j - 1]:
                 i, j = i - 1, j - 1
             elif min_val == matrix[i - 1][j]:
@@ -73,18 +73,19 @@ def backtrace_dtw(matrix):
     path.append((1, 1))
     path.reverse()
 
-    print("Matrix:")
-    for i in range(len(matrix)):
-        for j in range(len(matrix[0])):
-            print(
-                (
-                    f"{BOLD_RED}{matrix[i][j]:>2}{RESET}"
-                    if (i, j) in path
-                    else f"{matrix[i][j]:>2}"
-                ),
-                end=" ",
-            )
-        print("")
+    if print_matrix:
+        print("Matrix:")
+        for i in range(len(matrix)):
+            for j in range(len(matrix[0])):
+                print(
+                    (
+                        f"{BOLD_RED}{matrix[i][j]:>2}{RESET}"
+                        if (i, j) in path
+                        else f"{matrix[i][j]:>2}"
+                    ),
+                    end=" ",
+                )
+            print("")
 
     return sum_dtw, path
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     ts2 = create_offset_timeseries(ts1)
     timeseries = [ts1, ts2]
     dtw_mat = compute_dtw_matrix(timeseries)
-    _, path = backtrace_dtw(dtw_mat)
+    _, path = backtrace_dtw(dtw_mat, True)
     plot_timeseries(timeseries)
     timeseries = list(warp_series(ts1, ts2, path))
     plot_timeseries(timeseries)
