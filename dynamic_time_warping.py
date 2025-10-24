@@ -12,8 +12,15 @@ def create_timeseries(length=7):
     return vals
 
 
-def create_offset_timeseries(timeseries, offset=3):
-    pass
+def create_offset_timeseries(timeseries, offset=4):
+    copy = [0] * offset + timeseries[:-offset]
+    return copy
+
+
+def warp_series(ts1, ts2, path):
+    aligned_ts2 = [ts2[j - 1] for (_, j) in path]
+    aligned_ts1 = [ts1[i - 1] for (i, j) in path]
+    return aligned_ts1, aligned_ts2
 
 
 def compute_dtw_matrix(timeseries):
@@ -79,7 +86,7 @@ def backtrace_dtw(matrix):
             )
         print("")
 
-    return sum_dtw
+    return sum_dtw, path
 
 
 def plot_timeseries(timeseries: list[list[int]]):
@@ -92,7 +99,11 @@ def plot_timeseries(timeseries: list[list[int]]):
 
 
 if __name__ == "__main__":
-    timeseries = [create_timeseries() for _ in range(2)]
+    ts1 = create_timeseries(40)
+    ts2 = create_offset_timeseries(ts1)
+    timeseries = [ts1, ts2]
     dtw_mat = compute_dtw_matrix(timeseries)
-    backtrace_dtw(dtw_mat)
+    _, path = backtrace_dtw(dtw_mat)
+    plot_timeseries(timeseries)
+    timeseries = list(warp_series(ts1, ts2, path))
     plot_timeseries(timeseries)
